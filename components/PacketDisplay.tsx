@@ -32,7 +32,7 @@ type HttpPacket = {
   headers: Record<string, string>;
   body: string;
   client_ip: string;
-  server_ip: Array<string | number>;
+  server_ip: string;
   server_hostname: string;
   port?: number;
   userId: string;
@@ -41,12 +41,6 @@ type HttpPacket = {
 };
 
 // Helper function to format server IP
-const formatServerIP = (serverIP: Array<string | number>): string => {
-  if (serverIP[0] === "::1") {
-    return `${serverIP[0]}:${serverIP[1]}`;
-  }
-  return serverIP.join(".");
-};
 
 // New component for packet row with expandable headers
 const PacketRow = ({
@@ -80,7 +74,7 @@ const PacketRow = ({
       <td className="border px-4 py-2">
         {packet.port || <span className="text-muted-foreground">—</span>}
       </td>
-      <td className="border px-4 py-2">{formatServerIP(packet.server_ip)}</td>
+      <td className="border px-4 py-2">{packet.server_ip}</td>
       <td className="border px-4 py-2">{packet.server_hostname}</td>
       <td className="border px-4 py-2">
         <div className="whitespace-pre-wrap max-w-[30rem] break-words">
