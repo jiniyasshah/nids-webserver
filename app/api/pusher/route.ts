@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToMongoose } from "@/lib/mongodb";
-import Packet from "@/models/packet";
+import User from "@/models/user";
 import pusherServer from "@/lib/pusher-server";
+import mongoose from "mongoose";
 
 // POST endpoint to receive packet data from Python server
 export async function POST(request: Request) {
@@ -12,49 +13,52 @@ export async function POST(request: Request) {
     console.log("Received packet data:", data);
 
     // Validate the incoming data
-    if (!data || !data.client_ip) {
-      console.log("Invalid packet data - missing client_ip");
+    if (!data || !data.userId) {
+      console.log("Invalid packet data - missing userId");
       return NextResponse.json(
-        { message: "Invalid packet data - missing client_ip" },
+        { message: "Invalid packet data - missing userId" },
+        { status: 400 }
+      );
+    }
+
+    // Validate that the userId is a valid ObjectId format before querying
+    if (!mongoose.Types.ObjectId.isValid(data.userId)) {
+      console.log(`Invalid user ID format: ${data.userId}`);
+      return NextResponse.json(
+        { message: "Invalid user ID format" },
         { status: 400 }
       );
     }
 
     await connectToMongoose();
 
-    // Find all users who have registered this IP
-    const matchingPackets = await Packet.find({ ip: data.client_ip });
-    console.log(
-      `Found ${matchingPackets.length} matching packets for IP ${data.client_ip}`
+    // Verify that the user exists
+    const user = await User.findById(data.userId);
+    if (!user) {
+      console.log(`User with ID ${data.userId} not found`);
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    console.log(`Broadcasting packet to user: ${data.userId}`);
+
+    // Add a unique ID to the packet to prevent duplicates
+    const packetWithId = {
+      ...data,
+      _packetId: new mongoose.Types.ObjectId().toString(),
+      timestamp: data.timestamp || new Date().toISOString(),
+    };
+
+    // Broadcast directly to the user's private channel
+    await pusherServer.trigger(
+      `private-user-${data.userId}`,
+      "packet-event",
+      packetWithId
     );
-
-    if (matchingPackets.length === 0) {
-      // No users are tracking this IP, so we don't need to broadcast it
-      return NextResponse.json(
-        { message: "No users tracking this IP" },
-        { status: 200 }
-      );
-    }
-
-    // Get unique user IDs who are tracking this IP
-    const userIds = [
-      ...new Set(matchingPackets.map((packet) => packet.userId)),
-    ];
-    console.log(`Broadcasting to ${userIds.length} users:`, userIds);
-
-    // Broadcast to each user's private channel
-    for (const userId of userIds) {
-      await pusherServer.trigger(
-        `private-user-${userId}`,
-        "packet-event",
-        data
-      );
-    }
 
     return NextResponse.json(
       {
         message: "Packet data processed successfully",
-        userCount: userIds.length,
+        userId: data.userId,
       },
       { status: 200 }
     );

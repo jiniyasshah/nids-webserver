@@ -77,13 +77,10 @@ export async function GET(request: Request) {
       const packetObj = packet.toObject();
       const userId = packetObj.userId.toString();
       return {
-        id: packetObj._id.toString(),
         ip: packetObj.ip,
         domain: packetObj.domain,
-        createdAt: packetObj.createdAt,
+        port: packetObj.port || null,
         userId: userId,
-        userName: userMap[userId]?.name || "Unknown",
-        userEmail: userMap[userId]?.email || "Unknown",
       };
     });
 

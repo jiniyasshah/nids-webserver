@@ -8,6 +8,7 @@ export interface Packet {
   _id: string;
   ip: string;
   domain: string;
+  port?: number; // Added port field as optional
   createdAt: string;
 }
 
@@ -15,6 +16,7 @@ interface AllPacket {
   _id: string;
   ip: string;
   domain: string;
+  port?: number; // Added port field as optional
   userId: string;
 }
 
@@ -142,7 +144,7 @@ export function PacketProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Error adding packet:", err);
       // Don't set general error for validation errors
-      if (!(err as any).status === 409) {
+      if ((err as any).status !== 409) {
         setError("Failed to add packet. Please try again.");
       }
       throw err;

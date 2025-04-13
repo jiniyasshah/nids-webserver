@@ -135,6 +135,7 @@ export function PacketRegistry() {
           <TableRow>
             <TableHead>IP Address</TableHead>
             <TableHead>Domain Name</TableHead>
+            <TableHead>Port</TableHead>
             <TableHead>Date Added</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
@@ -144,6 +145,11 @@ export function PacketRegistry() {
             <TableRow key={packet._id}>
               <TableCell className="font-medium">{packet.ip}</TableCell>
               <TableCell>{packet.domain}</TableCell>
+              <TableCell>
+                {packet.port || (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
               <TableCell>
                 {new Date(packet.createdAt).toLocaleString()}
               </TableCell>

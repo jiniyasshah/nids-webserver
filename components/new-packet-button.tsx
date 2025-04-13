@@ -50,10 +50,12 @@ export function PacketDialogProvider({
   const [formData, setFormData] = useState({
     ip: "",
     domain: "",
+    port: "", // Added port field
   });
   const [formErrors, setFormErrors] = useState<{
     ip?: string;
     domain?: string;
+    port?: string;
     general?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,7 +65,7 @@ export function PacketDialogProvider({
   const openDialog = useCallback(() => {
     setOpen(true);
     // Reset form state when opening
-    setFormData({ ip: "", domain: "" });
+    setFormData({ ip: "", domain: "", port: "" });
     setFormErrors({});
   }, []);
 
@@ -71,6 +73,7 @@ export function PacketDialogProvider({
     const errors: {
       ip?: string;
       domain?: string;
+      port?: string;
     } = {};
     let isValid = true;
 
@@ -107,6 +110,15 @@ export function PacketDialogProvider({
       isValid = false;
     }
 
+    // Port validation
+    if (formData.port) {
+      const portNum = Number.parseInt(formData.port, 10);
+      if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+        errors.port = "Please enter a valid port number (1-65535)";
+        isValid = false;
+      }
+    }
+
     setFormErrors(errors);
     return isValid;
   };
@@ -135,10 +147,11 @@ export function PacketDialogProvider({
       await addPacket({
         ip: formData.ip,
         domain: formData.domain,
+        port: formData.port ? Number.parseInt(formData.port, 10) : undefined,
       });
 
       // Reset form and close dialog
-      setFormData({ ip: "", domain: "" });
+      setFormData({ ip: "", domain: "", port: "" });
       setFormErrors({});
       setOpen(false);
 
@@ -233,6 +246,30 @@ export function PacketDialogProvider({
                   {formErrors.domain && (
                     <p className="text-destructive text-xs">
                       {formErrors.domain}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="port" className="text-right">
+                  Port (Optional)
+                </Label>
+                <div className="col-span-3 space-y-1">
+                  <Input
+                    id="port"
+                    name="port"
+                    type="number"
+                    placeholder="80"
+                    min="1"
+                    max="65535"
+                    value={formData.port}
+                    onChange={handleChange}
+                    className={formErrors.port ? "border-destructive" : ""}
+                  />
+                  {formErrors.port && (
+                    <p className="text-destructive text-xs">
+                      {formErrors.port}
                     </p>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import pusherClient from "@/lib/pusher";
 import { useSession } from "next-auth/react";
 import { usePackets } from "@/context/packet-context";
@@ -34,7 +34,10 @@ type HttpPacket = {
   client_ip: string;
   server_ip: Array<string | number>;
   server_hostname: string;
+  port?: number;
+  userId: string;
   timestamp?: string;
+  _packetId?: string; // Added to track unique packets
 };
 
 // Helper function to format server IP
@@ -69,17 +72,14 @@ const PacketRow = ({
       onClick={() => setIsExpanded(!isExpanded)}
     >
       <td className="border px-4 py-2">{packet.method}</td>
-      <td
-        className={`border px-4 py-2 w-[200px]  ${
-          isExpanded ? "break-words" : "truncate"
-        }`}
-      >
-        {packet.url}
-      </td>
+      <td className="border px-4 py-2 max-w-[200px] truncate">{packet.url}</td>
       <td className="border px-4 py-2">
         {packet.timestamp || new Date().toISOString()}
       </td>
       <td className="border px-4 py-2">{packet.client_ip}</td>
+      <td className="border px-4 py-2">
+        {packet.port || <span className="text-muted-foreground">—</span>}
+      </td>
       <td className="border px-4 py-2">{formatServerIP(packet.server_ip)}</td>
       <td className="border px-4 py-2">{packet.server_hostname}</td>
       <td className="border px-4 py-2">
@@ -117,17 +117,17 @@ export default function PacketDisplay() {
     {}
   );
 
-  useEffect(() => {
-    if (!session?.user?.id) return;
+  // Use a ref to track if we're already subscribed to avoid duplicate subscriptions
+  const subscribedRef = useRef(false);
 
-    // Clean up existing subscriptions first
-    pusherClient.unsubscribe(`private-user-${session.user.id}`);
+  useEffect(() => {
+    if (!session?.user?.id || subscribedRef.current) return;
+
+    // Set the flag to true to prevent duplicate subscriptions
+    subscribedRef.current = true;
 
     // Subscribe to the user's private channel
     const channel = pusherClient.subscribe(`private-user-${session.user.id}`);
-
-    // Unbind any existing event handlers
-    channel.unbind("packet-event");
 
     channel.bind("packet-event", (data: HttpPacket) => {
       // Add timestamp if not present
@@ -136,18 +136,14 @@ export default function PacketDisplay() {
         timestamp: data.timestamp || new Date().toISOString(),
       };
 
+      // Use a functional update to ensure we're working with the latest state
       setPackets((prevPackets) => {
-        // Check if this packet already exists to prevent duplicates
-        // This is a simple check - you might need more sophisticated comparison
-        const isDuplicate = prevPackets.some(
-          (p) =>
-            p.url === data.url &&
-            p.method === data.method &&
-            p.timestamp === packetWithTimestamp.timestamp
-        );
-
-        if (isDuplicate) {
-          return prevPackets; // Don't add duplicates
+        // Check if this packet already exists (by _packetId if available)
+        if (
+          data._packetId &&
+          prevPackets.some((p) => p._packetId === data._packetId)
+        ) {
+          return prevPackets; // Skip duplicate
         }
 
         const newPackets = [packetWithTimestamp, ...prevPackets.slice(0, 999)];
@@ -157,8 +153,8 @@ export default function PacketDisplay() {
     });
 
     return () => {
-      channel.unbind("packet-event");
       pusherClient.unsubscribe(`private-user-${session.user.id}`);
+      subscribedRef.current = false;
     };
   }, [session]);
 
@@ -243,6 +239,7 @@ export default function PacketDisplay() {
                   <th className="px-4 py-2">URL</th>
                   <th className="px-4 py-2">Timestamp</th>
                   <th className="px-4 py-2">Client IP</th>
+                  <th className="px-4 py-2">Port</th>
                   <th className="px-4 py-2">Server IP</th>
                   <th className="px-4 py-2">Server Host</th>
                   <th className="px-4 py-2">Headers</th>
@@ -251,7 +248,11 @@ export default function PacketDisplay() {
               </thead>
               <tbody>
                 {packets.map((packet, index) => (
-                  <PacketRow key={index} packet={packet} index={index} />
+                  <PacketRow
+                    key={packet._packetId || index}
+                    packet={packet}
+                    index={index}
+                  />
                 ))}
               </tbody>
             </table>

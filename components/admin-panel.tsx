@@ -3,25 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import copy from "copy-to-clipboard";
-import { CheckCircle } from "lucide-react";
-// In your component:
-const copyApiKey = (key: string) => {
-  try {
-    copy(key);
-    toast({
-      title: "Copied",
-      description: "API key copied to clipboard",
-    });
-  } catch (err) {
-    console.error("Failed to copy:", err);
-    toast({
-      title: "Copy failed",
-      description: "Please manually select and copy the API key",
-      variant: "destructive",
-    });
-  }
-};
 import {
   RefreshCw,
   AlertCircle,
@@ -48,6 +29,7 @@ interface AdminPacket {
   _id: string;
   ip: string;
   domain: string;
+  port?: number;
   userId: string;
   createdAt: string;
   user: {
@@ -74,7 +56,6 @@ export function AdminPanel() {
   const [error, setError] = useState<string | null>(null);
   const [isCreateKeyDialogOpen, setIsCreateKeyDialogOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
   const [newKey, setNewKey] = useState<{
     id: string;
     key: string;
@@ -201,25 +182,28 @@ export function AdminPanel() {
   };
 
   const copyApiKey = (key: string) => {
-    try {
-      copy(key);
-      setIsCopied(true);
-      toast({
-        title: "Success",
-        description: "API key copied to clipboard",
-      });
-
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-      toast({
-        title: "Copy failed",
-        description: "Please manually select and copy the API key",
-        variant: "destructive",
-      });
+    // Check if clipboard API is available
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      navigator.clipboard.writeText
+    ) {
+      navigator.clipboard
+        .writeText(key)
+        .then(() => {
+          toast({
+            title: "Copied",
+            description: "API key copied to clipboard",
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err);
+          // Fallback method
+          copyToClipboardFallback(key);
+        });
+    } else {
+      // Use fallback method if Clipboard API is not available
+      copyToClipboardFallback(key);
     }
   };
 
@@ -346,6 +330,7 @@ export function AdminPanel() {
                     <tr className="bg-muted-foreground/10">
                       <th className="px-4 py-2 text-left">IP</th>
                       <th className="px-4 py-2 text-left">Domain</th>
+                      <th className="px-4 py-2 text-left">Port</th>
                       <th className="px-4 py-2 text-left">User</th>
                       <th className="px-4 py-2 text-left">Email</th>
                       <th className="px-4 py-2 text-left">Date Added</th>
@@ -360,6 +345,11 @@ export function AdminPanel() {
                         >
                           <td className="px-4 py-2">{packet.ip}</td>
                           <td className="px-4 py-2">{packet.domain}</td>
+                          <td className="px-4 py-2">
+                            {packet.port || (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
                           <td className="px-4 py-2">{packet.user.name}</td>
                           <td className="px-4 py-2">{packet.user.email}</td>
                           <td className="px-4 py-2">
@@ -369,7 +359,7 @@ export function AdminPanel() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={5} className="px-4 py-2 text-center">
+                        <td colSpan={6} className="px-4 py-2 text-center">
                           No packets found in the system.
                         </td>
                       </tr>
@@ -517,20 +507,11 @@ else:
                   </code>
                   <Button
                     size="sm"
-                    variant={isCopied ? "success" : "outline"}
+                    variant="outline"
                     onClick={() => copyApiKey(newKey.key)}
-                    className={`shrink-0 transition-colors ${
-                      isCopied
-                        ? "bg-green-100 text-green-600 border-green-200 hover:bg-green-200"
-                        : ""
-                    }`}
+                    className="shrink-0"
                   >
-                    {isCopied ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                    {isCopied && <span className="ml-2">Copied!</span>}
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

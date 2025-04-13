@@ -38,13 +38,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { ip, domain } = await request.json();
+    const { ip, domain, port } = await request.json();
 
     if (!ip || !domain) {
       return NextResponse.json(
         { message: "IP and domain are required" },
         { status: 400 }
       );
+    }
+
+    // Validate port if provided
+    if (port !== undefined) {
+      const portNum = Number(port);
+      if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+        return NextResponse.json(
+          {
+            message: "Port must be a number between 1 and 65535",
+            field: "port",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     await connectToMongoose();
@@ -84,6 +98,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       ip,
       domain,
+      port: port !== undefined ? Number(port) : undefined,
     });
 
     await packet.save();
