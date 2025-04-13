@@ -3,9 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { SignOutButton } from "@/components/sign-out-button";
-import { NewPacketButton } from "@/components/new-packet-button";
 import { AppTabs } from "@/components/tabs";
 
 export default function Home() {
@@ -35,19 +32,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-background">
-        <div className="container mx-auto py-3">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Network Packet Tracker</h1>
-            <div className="flex items-center gap-2">
-              <NewPacketButton />
-              <SignOutButton />
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </header>
-
       <nav className="bg-muted/40 border-b">
         <div className="container mx-auto">
           <AppTabs />

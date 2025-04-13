@@ -18,6 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { NewPacketButton } from "@/components/new-packet-button";
+import { SignOutButton } from "@/components/sign-out-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppTabs() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -31,36 +34,42 @@ export function AppTabs() {
       onValueChange={setActiveTab}
       className="w-full"
     >
-      <TabsList className="h-14 w-full justify-start rounded-none border-0 bg-transparent p-0">
-        <TabsTrigger
-          value="dashboard"
-          className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-        >
-          Dashboard
-        </TabsTrigger>
-        <TabsTrigger
-          value="registry"
-          className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-        >
-          Packet Registry
-        </TabsTrigger>
-        <TabsTrigger
-          value="api"
-          className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-        >
-          API Settings
-        </TabsTrigger>
+      <TabsList className="h-14 w-full justify-between rounded-none border-0 bg-transparent p-0">
+        <div className="flex">
+          <TabsTrigger
+            value="dashboard"
+            className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger
+            value="registry"
+            className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            Packet Registry
+          </TabsTrigger>
+          <TabsTrigger
+            value="api"
+            className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
+          >
+            API Settings
+          </TabsTrigger>
+        </div>
 
-        {session?.user?.isAdmin && (
-          <div className="ml-auto flex items-center pr-2">
+        <div className="flex items-center gap-2 pr-2">
+          <ThemeToggle />
+          {session?.user?.isAdmin && (
             <Button asChild variant="outline" size="sm" className="gap-1">
               <Link href="/admin">
                 <ShieldAlert className="h-4 w-4" />
                 Admin Panel
               </Link>
             </Button>
-          </div>
-        )}
+          )}
+
+          <NewPacketButton />
+          <SignOutButton />
+        </div>
       </TabsList>
 
       <div className="mt-6">
@@ -94,7 +103,11 @@ def send_packet_to_nextjs(packet_data, user_id):
     """
     Send packet data to the Next.js Pusher endpoint
     """
-    url = "https://your-domain.com/api/pusher"
+    # Use localhost for testing locally
+    url = "http://localhost:3000/api/pusher"
+    
+    # For production, use your domain
+    # url = "https://your-domain.com/api/pusher"
     
     # Add the user ID to the packet data
     packet_data["userId"] = user_id
@@ -115,7 +128,7 @@ def send_packet_to_nextjs(packet_data, user_id):
     except Exception as e:
         print(f"Exception: {str(e)}")
 
-# Replace with your user ID
+# ⚠️ IMPORTANT: Replace with your actual user ID from above ⚠️
 USER_ID = "your_user_id_here"
 
 packet = {

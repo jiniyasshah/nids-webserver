@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToMongoose } from "@/lib/mongodb";
 import User from "@/models/user";
+import LivePacket from "@/models/live-packet";
 import pusherServer from "@/lib/pusher-server";
 import mongoose from "mongoose";
 
@@ -41,10 +42,31 @@ export async function POST(request: Request) {
 
     console.log(`Broadcasting packet to user: ${data.userId}`);
 
-    // Add a unique ID to the packet to prevent duplicates
+    // Create a unique ID for the packet
+    const packetId = new mongoose.Types.ObjectId();
+
+    // Prepare packet data for storage
+    const packetToStore = {
+      _id: packetId,
+      userId: data.userId,
+      url: data.url,
+      method: data.method,
+      headers: data.headers || {},
+      client_ip: data.client_ip,
+      server_ip: data.server_ip, // Now expecting this to be a string
+      server_hostname: data.server_hostname,
+      port: data.port,
+      timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
+      createdAt: new Date(),
+    };
+
+    // Save the packet to MongoDB
+    await LivePacket.create(packetToStore);
+
+    // Add the ID to the packet for real-time delivery
     const packetWithId = {
       ...data,
-      _packetId: new mongoose.Types.ObjectId().toString(),
+      _id: packetId.toString(),
       timestamp: data.timestamp || new Date().toISOString(),
     };
 
@@ -59,6 +81,7 @@ export async function POST(request: Request) {
       {
         message: "Packet data processed successfully",
         userId: data.userId,
+        packetId: packetId.toString(),
       },
       { status: 200 }
     );
