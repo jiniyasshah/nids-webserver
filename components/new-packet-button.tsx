@@ -196,7 +196,7 @@ export function PacketDialogProvider({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New Packet</DialogTitle>
+            <DialogTitle>Add Server's Address</DialogTitle>
             <DialogDescription>
               Enter the details for the new network packet you want to track.
             </DialogDescription>
@@ -253,7 +253,7 @@ export function PacketDialogProvider({
 
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="port" className="text-right">
-                  Port (Optional)
+                  Port 
                 </Label>
                 <div className="col-span-3 space-y-1">
                   <Input
@@ -286,7 +286,7 @@ export function PacketDialogProvider({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Packet"}
+                {isSubmitting ? "Adding..." : "Add Server"}
               </Button>
             </DialogFooter>
           </form>
