@@ -198,7 +198,7 @@ export function PacketDialogProvider({
           <DialogHeader>
             <DialogTitle>Add Server's Address</DialogTitle>
             <DialogDescription>
-              Enter the details for the new network packet you want to track.
+              Enter the details for the new server you want to track.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
@@ -253,7 +253,7 @@ export function PacketDialogProvider({
 
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="port" className="text-right">
-                  Port 
+                  Port
                 </Label>
                 <div className="col-span-3 space-y-1">
                   <Input

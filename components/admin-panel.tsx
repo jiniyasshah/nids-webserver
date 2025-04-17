@@ -296,7 +296,7 @@ export function AdminPanel() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="packets">All Packets</TabsTrigger>
+          <TabsTrigger value="packets">Server Details</TabsTrigger>
           <TabsTrigger value="api-keys">API Keys</TabsTrigger>
         </TabsList>
 
@@ -317,7 +317,7 @@ export function AdminPanel() {
           ) : (
             <div className="bg-muted p-4 rounded-md">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">All System Packets</h3>
+                <h3 className="text-lg font-semibold">Registered Servers</h3>
                 <Button onClick={fetchAdminPackets} variant="outline" size="sm">
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh

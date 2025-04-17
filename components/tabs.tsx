@@ -46,7 +46,7 @@ export function AppTabs() {
             value="registry"
             className="h-14 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent"
           >
-            Packet Registry
+            My Servers
           </TabsTrigger>
           <TabsTrigger
             value="api"

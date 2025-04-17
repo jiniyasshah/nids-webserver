@@ -100,9 +100,11 @@ export function PacketRegistry() {
   if (!hasPackets) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <h3 className="text-xl font-semibold mb-2">No packets in registry</h3>
+        <h3 className="text-xl font-semibold mb-2">
+          Please register your server
+        </h3>
         <p className="text-muted-foreground">
-          Your packet registry is empty. Add packets using the "New" button.
+          Your server registry is empty. Add packets using the "New" button.
         </p>
       </div>
     );
@@ -111,10 +113,10 @@ export function PacketRegistry() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Packet Registry</h2>
+        <h2 className="text-xl font-semibold">Server Registry</h2>
         <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
-            {packets.length} packet(s) registered
+            {packets.length} server{packets.length > 1 ? "s" : ""} registered
           </p>
           <Button
             variant="outline"
