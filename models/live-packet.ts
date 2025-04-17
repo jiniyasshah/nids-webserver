@@ -1,3 +1,4 @@
+// models/live-packet.ts
 import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ILivePacket extends Document {
@@ -6,9 +7,10 @@ export interface ILivePacket extends Document {
   method: string;
   headers: Record<string, string>;
   client_ip: string;
-  server_ip: string; // Changed from Array<string | number> to string
+  server_ip: string;
   server_hostname: string;
   port?: number;
+  match_result?: string; // Added match_result field
   timestamp: Date;
   createdAt: Date;
 }
@@ -19,9 +21,10 @@ const LivePacketSchema: Schema = new Schema({
   method: { type: String, required: true },
   headers: { type: Object, default: {} },
   client_ip: { type: String, required: true },
-  server_ip: { type: String, required: true }, // Changed from Array to String
-  server_hostname: { type: String, required: true },
+  server_ip: { type: String, required: true },
+  server_hostname: { type: String },
   port: { type: Number },
+  match_result: { type: String }, // Added match_result field
   timestamp: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });

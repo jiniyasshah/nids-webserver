@@ -68,6 +68,7 @@ type HttpPacket = {
   client_ip: string;
   server_ip: string;
   server_hostname: string;
+  match_result: string;
   port?: number;
   userId: string;
   timestamp: string;
@@ -770,7 +771,7 @@ export default function PacketDisplay() {
                   <th className="px-4 py-2 text-left">Client IP</th>
                   <th className="px-4 py-2 text-left">Port</th>
                   <th className="px-4 py-2 text-left">Server IP</th>
-                  <th className="px-4 py-2 text-left">Server Host</th>
+                  <th className="px-4 py-2 text-left">Potential Reason</th>
                 </tr>
               </thead>
               <tbody>
@@ -834,7 +835,7 @@ export default function PacketDisplay() {
                           )}
                         </td>
                         <td className="px-4 py-2">{packet.server_ip}</td>
-                        <td className="px-4 py-2">{packet.server_hostname}</td>
+                        <td className="px-4 py-2">{packet.match_result}</td>
                       </tr>
                       {expandedPacketId === packet._id && (
                         <tr>

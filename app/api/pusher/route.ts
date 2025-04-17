@@ -53,8 +53,9 @@ export async function POST(request: Request) {
       method: data.method,
       headers: data.headers || {},
       client_ip: data.client_ip,
-      server_ip: data.server_ip, // Now expecting this to be a string
-      server_hostname: data.server_hostname,
+      server_ip: data.server_ip,
+      server_hostname: data.server_hostname, // Now expecting this to be a string
+      match_result: data.match_result,
       port: data.port,
       timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
       createdAt: new Date(),
